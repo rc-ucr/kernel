@@ -62,9 +62,17 @@
 REDHAT.ROOT     = $(CURDIR)/../../
 -include $(ROCKSROOT)/etc/Rules.mk
 include Rules.mk
+HTTPGET		= $(ROCKSROOT)/bin/httpget.sh
 
 
 build:
+#	https://download.gnome.org/sources/glib/2.56/glib-2.56.4.tar.xz
+#	https://bugzilla.redhat.com/show_bug.cgi?id=1655751
+#	/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/libpangocairo-1.0.so: undefined reference to `g_log_structured_standard'
+ifeq ($(shell ! test -f $(TARFILE) && echo -n yes),yes)
+	@echo "WARNING: Forced upgrade to $(TARFILE)."
+	$(HTTPGET) -B https://download.gnome.org/sources/glib/2.56  -F . -n $(TARFILE)
+endif
 	unxz -c $(TARFILE) | $(TAR) xvf - 
 	(								\
 		cd $(SUBDIR) ; 						\
