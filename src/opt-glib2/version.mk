@@ -1,6 +1,6 @@
 NAME		= opt-glib2
 PKGROOT		= /opt/devel
-VERSION		= 2.44.1
+VERSION		= 2.56.4
 RELEASE		= 0
 SUBDIR		= glib-$(VERSION)
 TARFILE		= $(SUBDIR).tar.xz

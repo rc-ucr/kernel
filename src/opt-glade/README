@@ -1,0 +1,2 @@
+Fixes: https://bugzilla.gnome.org/show_bug.cgi?id=782161
+https://gitlab.gnome.org/GNOME/glade/-/blob/8a73d114ca5b4d37a770d0b6b69dd17a366dbcf4/gladeui/glade-signal-model.c

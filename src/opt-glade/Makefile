@@ -66,8 +66,10 @@ include Rules.mk
 
 build:
 	unxz -c $(TARFILE) | $(TAR) xvf - 
+	(cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../)
 	(								\
 		cd $(SUBDIR) ; 						\
+		patch -p1 < $(PATCHFILE)				\
 		module load opt-devel;					\
 		./configure --enable-glade-ui --prefix=$(PKGROOT) ;			\
 		$(MAKE) ; 						\
