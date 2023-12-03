@@ -6,7 +6,8 @@ INSTALLERISO	= rocks-installer-$(VERSION.MAJOR)-$(VERSION.MINOR).iso
 
 ISFINAL = --isfinal
 ifdef ISFINAL
-CENTRAL=central-$(shell echo $(VERSION) | tr . -)-x86-64.rocksclusters.org
+#CENTRAL=central-$(shell echo $(VERSION) | tr . -)-x86-64.rocksclusters.org
+CENTRAL=rc-ucr.org/$(shell echo $(VERSION) | tr . -)-UCR
 else
 CENTRAL=beta7.rocksclusters.org
 endif
