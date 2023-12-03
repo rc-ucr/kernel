@@ -66,8 +66,7 @@ include Rules.mk
 LORAXBUILD = loraxtmp
 LORAXCONF = lorax.conf
 ISOCONFIG = usr/share/lorax/config_files/x86/isolinux.cfg 
-APPENDLINE = central=$(shell echo $(CENTRAL) | sed 's/\//\\\//g') # CENTRAL now may contain slashes...
-
+APPENDLINE = central=$(CENTRAL)
 build:
 	## create a local rocks distribution
 	/opt/rocks/bin/rocks create distro
