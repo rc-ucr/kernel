@@ -62,7 +62,7 @@
                             <property name="invisible_char">●</property>
                             <property name="width_chars">48</property>
                             <property name="shadow_type">etched-in</property>
-                            <property name="placeholder_text">http://%rollserver%/install/rolls</property>
+                            <property name="placeholder_text">https://%rollserver%/install/rolls</property>
                             <signal name="activate" handler="listRolls" swapped="no"/>
                           </object>
                           <packing>

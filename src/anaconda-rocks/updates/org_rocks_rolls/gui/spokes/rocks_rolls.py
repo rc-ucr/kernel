@@ -121,13 +121,13 @@ class RocksRollsSpoke(NormalSpoke):
         self.defaultCentral ="beta7.rocksclusters.org"
         if r.central is not None:
             self.defaultCentral = r.central
-        self.defaultUrl ="http://%s/install/rolls" % self.defaultCentral
+        self.defaultUrl ="https://%s/install/rolls" % self.defaultCentral
 
         self.defaultCDPath = "/run/install/repo"
 
         self.selectAll = True
         self.rollSource = NETWORK
-        self.version = '7.0'
+        self.version = '7.2.0'
         self.requireDB = True
 
         self.requiredRolls = ('core','base','kernel')
