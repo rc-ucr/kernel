@@ -109,6 +109,12 @@ REDHAT.ROOT     = $(CURDIR)/../../
 include Rules.mk
 
 
+
+# ROCKS8
+# http://distro.ibiblio.org/slitaz/sources/packages-cooking/f/fcgi-2.4.2.tar.gz
+# ROCKS8:FIXME - Rebuild from original (patched) sources?
+# https://dl.fedoraproject.org/pub/epel/8/Everything/SRPMS/Packages/f/fcgi-2.4.0-36.el8.src.rpm
+
 build:
 	tar zvfx $(TARNAME)-$(VERSION).tar.gz
 	cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/opt/rocks/bin/python
 #
 # This script tries much harder to get a kickstart file. Needed for
 # larger clusters.

@@ -24,7 +24,6 @@ from pyanaconda import nm
 from pyanaconda.kickstart import getAvailableDiskSpace
 from blivet.partspec import PartSpec
 from blivet.platform import platform
-from blivet.devicelibs import swap
 from blivet.size import Size
 import logging
 import shutil

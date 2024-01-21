@@ -197,7 +197,10 @@
 #
 # support for GUI installs
 #
-import gtk
+# import gtk
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
 import gui
 import sys
 from iw_gui import *

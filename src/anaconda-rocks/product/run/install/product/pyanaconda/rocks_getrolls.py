@@ -116,6 +116,7 @@ _ = lambda x: gettext.ldgettext("anaconda", x)
 import logging
 log = logging.getLogger("anaconda")
 
+# ROCKS8 - foundation-anaconda now uses /opt/rocks/bin/python by default
 #
 # This is hacky, but it works.
 # Since anaconda is called with RedHat's native python (/usr/bin/python), it
@@ -125,12 +126,9 @@ log = logging.getLogger("anaconda")
 # /usr/lib64/python2.6/xml and never jump over to
 # /opt/rocks/lib/python2.6/xml. So we need to unload the xml module first
 #
-
-import sys
-
-del sys.modules['xml']
-
-sys.path.append('/opt/rocks/lib/python2.6/site-packages')
+#import sys
+#del sys.modules['xml']
+#sys.path.append('/opt/rocks/lib/python2.6/site-packages')
 
 import rocks.media
 import rocks.roll

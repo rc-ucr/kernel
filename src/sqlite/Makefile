@@ -73,6 +73,9 @@ REDHAT.ROOT     = $(CURDIR)/../../
 include Rules.mk
 
 
+# ROCKS8:FIXME Shall we use a newer version?
+# https://src.fedoraproject.org/repo/pkgs/sqlite/sqlite-autoconf-3440200.tar.gz/sha512/59ad55df15eb84430f5286db2e5ceddd6ca1fc207a6343546a365c0c1baf20258e96c53d2ad48b50385608d03de09a692ae834cb78a39d1a48cb36a05722e402/sqlite-autoconf-3440200.tar.gz
+
 build:
 	tar zvfx $(TARFILE)
 	(								\

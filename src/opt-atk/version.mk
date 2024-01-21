@@ -1,6 +1,7 @@
 NAME		= opt-atk
 PKGROOT		= /opt/devel
-VERSION		= 2.16.0
+VERSION		= 2.28.1
+#VERSION	= 2.16.0
 RELEASE		= 0
 SUBDIR		= atk-$(VERSION)
 TARFILE		= $(SUBDIR).tar.xz

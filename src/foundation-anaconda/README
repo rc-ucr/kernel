@@ -1,0 +1,31 @@
+README
+------
+
+- foundation-anaconda is an _exact_ copy of CentOS 7.9.2009 installer to which the 
+  extensions in anaconda-rocks fit.
+- foundation-anaconda shall be used for lorax only. It shall never be installed on
+  any server or node. It simply lives in the ramdisk during installation and is never
+  used later on.
+- Packages from foundation-anaconda shall be refereced in 
+  ./rocks-boot-8/patch-files/usr/share/lorax/runtime-*
+
+
+Snippets:
+---------
+
+Manually configure CentOS-Anaconda:
+PYTHON=/opt/rocks/bin/python PKG_CONFIG_PATH=/opt/rocks/lib/pkgconfig:$PKG_CONFIG_PATH 
+LDFLAGS="-L/opt/rocks/lib" LIBS="-lpython2.7 -ldl -lm -lpthread -lutil -lssl -lcrypto -lssl" 
+./configure --prefix=/tmp/muell/anaconda-21.48.22.159
+
+# Replace shebangs in first line only
+find . -type f | xargs sed -i '1 s/\/usr\/bin\/python/\/opt\/rocks\/bin\/python/'
+
+
+
+TODO:
+-----
+- fistboot-19.12 (so wie auf centos)
+- auch andere Pakete (vgl /usr/share/lorax/runtime-install.tmpl auf Buildhost)
+
+

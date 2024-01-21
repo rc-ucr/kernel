@@ -95,13 +95,23 @@ REDHAT.ROOT     = $(CURDIR)/../../
 -include $(ROCKSROOT)/etc/Rules.mk
 include Rules.mk
 
+# ROCKS8
+ifeq ($(strip $(VERSION.MAJOR)), 8)
+INCLUDE = -I/opt/rocks/include -I/usr/include/apr-1 -I/opt/rocks/fcgi/include -I/opt/sqlite/include
+else
 INCLUDE	= -I/usr/include/apr-1 -I/opt/rocks/fcgi/include -I/opt/sqlite/include
+endif
 SQLITELIBS = -ldl -lpthread /opt/sqlite/lib/libsqlite3.a
 CRYPTOLIBS = 
 RPMLIBS = -lrpm 
 ifeq ($(strip $(VERSION.MAJOR)), 7)
 CRYPTOLIBS = -lcrypto
 RPMLIBS += -lrpmio 
+endif
+# ROCKS8
+ifeq ($(strip $(VERSION.MAJOR)), 8)
+CRYPTOLIBS = /opt/rocks/lib/libcrypto.a
+RPMLIBS += -lrpmio
 endif
 
 LIBS	= -lcurl $(SQLITELIBS) $(RPMLIBS) $(CRYPTOLIBS)
@@ -110,6 +120,10 @@ EXTRA	+= -DTIMEIT
 #EXTRA	+= -DDEBUG
 #EXTRA	+= -DDEBUG1
 ifeq ($(strip $(VERSION.MAJOR)), 7)
+EXTRA += -DROCKS7
+endif
+# ROCKS8
+ifeq ($(strip $(VERSION.MAJOR)), 8)
 EXTRA += -DROCKS7
 endif
 EXTRA	+= -pg -g

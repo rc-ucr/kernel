@@ -61,7 +61,8 @@ REDHAT.ROOT     = $(CURDIR)/../../
 include Rules.mk
 IMGDIR=imgroot
 ADDON = org_rocks_rolls
-ANACONDA_USR = usr
+#ANACONDA_USR = usr
+ANACONDA_USR = opt/rocks
 ANACONDA_SHARE = $(ANACONDA_USR)/share/anaconda/addons
 UPDATES	= updates
 PRODUCT = product
@@ -70,7 +71,8 @@ UPDATES.IMG = updates.img
 SUBDIRS = $(PRODUCT) $(UPDATES)
 SYS.PYPATH = $(ANACONDA_USR)/lib/python2.7/site-packages
 ROCKS.PYPATH = /opt/rocks/lib/python2.7/site-packages
-UPDATES_DIRS = opt usr
+#UPDATES_DIRS = opt usr
+UPDATES_DIRS = opt
 PRODUCT_DIR = run 
 
 .PHONY: $(IMGDIR)
@@ -103,5 +105,5 @@ clean::
 	rm -rf $(NAME)-$(VERSION)
 	rm -f $(NAME).spec.in
 	-rm -rf $(ANACONDA_USR) $(UPDATES_DIRS) $(PRODUCT_DIR)
-	-rm $(UPDATES.IMG) 
+	-rm -f $(UPDATES.IMG) 
 	-rm -rf $(IMGDIR)

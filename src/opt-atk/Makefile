@@ -60,14 +60,22 @@
 #
 
 REDHAT.ROOT     = $(CURDIR)/../../
+HTTPGET         = $(ROCKSROOT)/bin/httpget.sh
 -include $(ROCKSROOT)/etc/Rules.mk
 include Rules.mk
 
 
 build:
+# ROCKS8 - bump to 2.28.1 (same as on Rocky8)
+# https://src.fedoraproject.org/repo/pkgs/atk/atk-2.28.1.tar.xz/sha512/aa61e7718b3f4d9c33ec2b4747e35f894a51550ef39ecc4a7af5705811c029645bd3c728071f446b075a0b7aef0c35c1b73406a210cd30171838f24a8dfc0abb/atk-2.28.1.tar.xz
+ifeq ($(shell ! test -f $(TARFILE) && echo -n yes),yes)
+	@echo "ROCKS8: Sideloading $(TARFILE)."
+	$(HTTPGET) -B https://src.fedoraproject.org -F repo/pkgs/atk/atk-2.28.1.tar.xz/sha512/aa61e7718b3f4d9c33ec2b4747e35f894a51550ef39ecc4a7af5705811c029645bd3c728071f446b075a0b7aef0c35c1b73406a210cd30171838f24a8dfc0abb -n $(TARFILE)
+endif
 	unxz -c $(TARFILE) | $(TAR) xvf - 
 	(								\
 		cd $(SUBDIR) ; 						\
+		PKG_CONFIG_PATH=/opt/rocks/lib/pkgconfig:$$PKG_CONFIG_PATH	\
 		./configure --prefix=$(PKGROOT) ;			\
 		$(MAKE) ; 						\
 	)

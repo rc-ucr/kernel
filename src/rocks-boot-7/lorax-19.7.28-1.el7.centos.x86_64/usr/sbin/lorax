@@ -1,0 +1,311 @@
+#!/usr/bin/python
+#
+# lorax
+#
+# Copyright (C) 2009  Red Hat, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Red Hat Author(s):  Martin Gracik <mgracik@redhat.com>
+#
+# pylint: disable=bad-preconf-access
+
+from __future__ import print_function
+
+import logging
+log = logging.getLogger("lorax")
+program_log = logging.getLogger("program")
+pylorax_log = logging.getLogger("pylorax")
+yum_log = logging.getLogger("yum")
+
+
+import atexit
+import fcntl
+from glob import glob
+import sys
+import os
+import shutil
+import tempfile
+from optparse import OptionParser, OptionGroup
+
+import yum
+# This is a bit of a hack to short circuit yum's internal logging
+# handler setup.  We already set one up so we don't need it to run.
+yum.logginglevels._added_handlers = True
+import pylorax
+from pylorax import DRACUT_DEFAULT, log_selinux_state
+from pylorax.yumbase import get_yum_base_object
+
+VERSION = "{0}-{1}".format(os.path.basename(sys.argv[0]), pylorax.vernum)
+
+def exit_handler(tempdir):
+    """Handle cleanup of tmpdir, if it still exists
+    """
+    if not tempdir:
+        return
+    if os.path.exists(tempdir):
+        log.info("Cleaning up tempdir - %s", tempdir)
+        shutil.rmtree(tempdir)
+
+
+def remove_tempdirs():
+    """Delete all unlocked tempdirs under tempfile.gettempdir
+
+    When lorax crashes it can leave behind tempdirs, which cannot be cleaned up by
+    systemd-tmpfiles (SELinux restricts a complete cleanup).
+
+    So we lock them while in use and cleanup all the ones that are not locked
+    when lorax starts.
+    """
+    for d in glob(os.path.join(tempfile.gettempdir(), "lorax.*")):
+        if not os.path.isdir(d):
+            continue
+        try:
+            dir_fd = os.open(d, os.O_RDONLY|os.O_DIRECTORY)
+            fcntl.flock(dir_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except IOError:
+            # lock failed, skip this directory
+            os.close(dir_fd)
+            continue
+
+        # Lock succeeded, remove the directory
+        log.info("Removing old tempdir %s", d)
+        shutil.rmtree(d)
+        os.close(dir_fd)
+
+
+def setup_logging(opts):
+    # Setup logging to console and to logfile
+    log.setLevel(logging.DEBUG)
+    pylorax_log.setLevel(logging.DEBUG)
+
+    sh = logging.StreamHandler()
+    sh.setLevel(logging.INFO)
+    fmt = logging.Formatter("%(asctime)s: %(message)s")
+    sh.setFormatter(fmt)
+    log.addHandler(sh)
+    pylorax_log.addHandler(sh)
+
+    fh = logging.FileHandler(filename=opts.logfile, mode="w")
+    fh.setLevel(logging.DEBUG)
+    fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+    fh.setFormatter(fmt)
+    log.addHandler(fh)
+    pylorax_log.addHandler(fh)
+
+    # External program output log
+    program_log.setLevel(logging.DEBUG)
+    logfile = os.path.abspath(os.path.dirname(opts.logfile))+"/program.log"
+    fh = logging.FileHandler(filename=logfile, mode="w")
+    fh.setLevel(logging.DEBUG)
+    program_log.addHandler(fh)
+
+    # yum logging
+    yum_log.setLevel(logging.DEBUG)
+    logfile = os.path.abspath(os.path.dirname(opts.logfile))+"/yum.log"
+    fh = logging.FileHandler(filename=logfile, mode="w")
+    fh.setLevel(logging.DEBUG)
+    yum_log.addHandler(fh)
+
+
+def main(args):
+    usage = "%prog -p PRODUCT -v VERSION -r RELEASE -s REPOSITORY OUTPUTDIR"
+
+    parser = OptionParser(usage=usage)
+
+    # required arguments for image creation
+    required = OptionGroup(parser, "required arguments")
+    required.add_option("-p", "--product", help="product name",
+            metavar="STRING")
+    required.add_option("-v", "--version", help="version identifier",
+            metavar="STRING")
+    required.add_option("-r", "--release", help="release information",
+            metavar="STRING")
+    required.add_option("-s", "--source",
+            help="source repository (may be listed multiple times)",
+            metavar="REPOSITORY", action="append", default=[])
+    required.add_option("--repo",
+            help="source yum repository file",
+            dest="repo_files", metavar="REPOSITORY", action="append", default=[])
+
+    # optional arguments
+    optional = OptionGroup(parser, "optional arguments")
+    optional.add_option("-m", "--mirrorlist",
+            help="mirrorlist repository (may be listed multiple times)",
+            metavar="REPOSITORY", action="append", default=[])
+    optional.add_option("-t", "--variant",
+            help="variant name", metavar="STRING")
+    optional.add_option("-b", "--bugurl",
+            help="bug reporting URL for the product", metavar="URL",
+            default="your distribution provided bug reporting tool")
+    optional.add_option("--isfinal", help="",
+            action="store_true", default=False, dest="isfinal")
+    optional.add_option("-c", "--config", default="/etc/lorax/lorax.conf",
+            help="config file", metavar="STRING")
+    optional.add_option("--proxy", default=None,
+            help="repo proxy url:port", metavar="STRING")
+    optional.add_option("-e", "--excludepkgs", default=[],
+            action="append", metavar="STRING",
+            help="package glob to exclude (may be listed multiple times)")
+    optional.add_option("-i", "--installpkgs", default=[],
+            action="append", metavar="STRING",
+            help="package glob to install before runtime-install.tmpl runs. (may be listed multiple times)")
+    optional.add_option("--buildarch", default=None,
+            help="build architecture", metavar="STRING")
+    optional.add_option("--volid", default=None,
+            help="volume id", metavar="STRING")
+    optional.add_option("--macboot", help="",
+            action="store_true", dest="domacboot")
+    optional.add_option("--nomacboot", help="",
+            action="store_false", default=False, dest="domacboot")
+    optional.add_option("--noupgrade", help="",
+            action="store_false", default=True, dest="doupgrade")
+    optional.add_option("--logfile", default="./lorax.log",
+            help="Path to logfile")
+    optional.add_option("--tmp", default="/var/tmp/lorax",
+            help="Top level temporary directory" )
+    optional.add_option("--add-template", dest="add_templates",
+            action="append", help="Additional template for runtime image",
+            default=[])
+    optional.add_option("--add-template-var", dest="add_template_vars",
+            action="append", help="Set variable for runtime image template",
+            default=[])
+    optional.add_option("--add-arch-template", dest="add_arch_templates",
+            action="append", help="Additional template for architecture-specific image",
+            default=[])
+    optional.add_option("--add-arch-template-var", dest="add_arch_template_vars",
+            action="append", help="Set variable for architecture-specific image",
+            default=[])
+    optional.add_option("--noverifyssl", action="store_true", default=False,
+                        help="Do not verify SSL certificates")
+    optional.add_option("--rootfs-size", type=int, default=2,
+                        help="Size of root filesystem in GiB. Defaults to 2.")
+
+    # dracut arguments
+    dracut_group = OptionGroup(parser, "dracut arguments")
+    dracut_group.add_option("--dracut-arg", action="append", dest="dracut_args",
+                            help="Argument to pass to dracut when "
+                                 "rebuilding the initramfs. Pass this "
+                                 "once for each argument. NOTE: this "
+                                 "overrides the default. (default: %s)" % (DRACUT_DEFAULT,) )
+
+    # add the option groups to the parser
+    parser.add_option_group(required)
+    parser.add_option_group(optional)
+    parser.add_option_group(dracut_group)
+
+    # add the show version option
+    parser.add_option("-V", help="show program's version number and exit",
+            action="store_true", dest="showver")
+
+    # parse the arguments
+    opts, args = parser.parse_args()
+
+    if opts.showver:
+        print(VERSION)
+        sys.exit(0)
+
+    try:
+        outputdir = os.path.abspath(args[0])
+    except IndexError:
+        parser.error("missing one or more required arguments")
+
+    # check for the required arguments
+    if not opts.product or not opts.version or not opts.release \
+            or not (opts.source or opts.repo_files) or not outputdir:
+        parser.error("missing one or more required arguments")
+
+    if os.path.exists(outputdir):
+        parser.error("output directory should not exist.")
+
+    opts.logfile = os.path.abspath(opts.logfile)
+
+    if opts.config and not os.path.exists(opts.config):
+        parser.error("config file %s doesn't exist." % opts.config)
+
+    setup_logging(opts)
+
+    log.info("Lorax %s", pylorax.vernum)
+
+    if not os.path.exists(opts.tmp):
+        os.makedirs(opts.tmp)
+
+    log_selinux_state()
+    tempfile.tempdir = opts.tmp
+
+    # Remove any orphaned lorax tempdirs
+    remove_tempdirs()
+
+    # create the temporary directory for lorax
+    tempdir = tempfile.mkdtemp(prefix="lorax.")
+
+    # register an exit handler to cleanup the temporary directory
+    atexit.register(exit_handler, tempdir)
+
+    # create the yumbase object
+    installtree = os.path.join(tempdir, "installtree")
+    os.mkdir(installtree)
+    yumtempdir = os.path.join(tempdir, "yum")
+    os.mkdir(yumtempdir)
+
+    # Obtain an exclusive lock on the tempdir
+    dir_fd = os.open(tempdir, os.O_RDONLY|os.O_DIRECTORY)
+    fcntl.flock(dir_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+    yb = get_yum_base_object(installtree, opts.source, opts.mirrorlist,
+                             opts.repo_files,
+                             yumtempdir, opts.proxy, opts.excludepkgs,
+                             not opts.noverifyssl, opts.release)
+
+    if yb is None:
+        print("error: unable to create the yumbase object", file=sys.stderr)
+        shutil.rmtree(tempdir)
+        sys.exit(1)
+
+    parsed_add_template_vars = {}
+    for kv in opts.add_template_vars:
+        k, t, v = kv.partition('=')
+        if t == '':
+            raise ValueError("Missing '=' for key=value in " % kv)
+        parsed_add_template_vars[k] = v
+
+    parsed_add_arch_template_vars = {}
+    for kv in opts.add_arch_template_vars:
+        k, t, v = kv.partition('=')
+        if t == '':
+            raise ValueError("Missing '=' for key=value in " % kv)
+        parsed_add_arch_template_vars[k] = v
+
+    # run lorax
+    lorax = pylorax.Lorax()
+    lorax.configure(conf_file=opts.config)
+    lorax.run(yb, opts.product, opts.version, opts.release,
+              opts.variant, opts.bugurl, opts.isfinal,
+              workdir=tempdir, outputdir=outputdir, buildarch=opts.buildarch,
+              volid=opts.volid, domacboot=opts.domacboot, doupgrade=opts.doupgrade,
+              installpkgs=opts.installpkgs,
+              size=opts.rootfs_size,
+              add_templates=opts.add_templates,
+              add_template_vars=parsed_add_template_vars,
+              add_arch_templates=opts.add_arch_templates,
+              add_arch_template_vars=parsed_add_arch_template_vars,
+              remove_temp=True,
+              user_dracut_args=opts.dracut_args)
+
+    # Release the lock on the tempdir
+    os.close(dir_fd)
+
+
+if __name__ == "__main__":
+    main(sys.argv)

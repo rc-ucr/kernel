@@ -90,6 +90,14 @@ fi
 . $ROLLSROOT/etc/bootstrap-functions.sh || exit 1
 
 
+# prerequisites for foundation-anaconda
+compile_and_install foundation-glib2
+compile_and_install foundation-atk
+compile_and_install foundation-at-spi2-atk
+compile_and_install foundation-gtk+
+compile_and_install foundation-glade
+
+
 compile fastcgi
 install foundation-fcgi
 compile sqlite 

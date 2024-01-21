@@ -144,15 +144,22 @@
 #
 ROCKS.OS.VERSION.MAJOR=$(shell lsb_release -rs | cut -d . -f 1)
 
-SRCDIRS = `find . -type d -maxdepth 1 \
+SRCDIRS = `find . -maxdepth 1 -type d \
 	-not -name CVS \
 	-not -name rocks-kernel \
 	-not -name kernel.org \
 	-not -name keyutils \
 	-not -name rocks-boot \
 	-not -name rocks-boot-7 \
+	-not -name rocks-boot-8 \
 	-not -name rocks-boot-pxe \
+	-not -name opt-devel-module \
+	-not -name opt-atk \
+	-not -name opt-glib2 \
+	-not -name opt-glade \
+	-not -name opt-gtk+ \
 	-not -name .` 
+# ROCKS8: removed opt-* subdirs, but introduced new foundation-* subdirs
 
 ifeq ($(strip $(ROCKS.OS.VERSION.MAJOR)), 5)
 SRCDIRS += keyutils
@@ -166,6 +173,10 @@ ifeq ($(strip $(ROCKS.OS.VERSION.MAJOR)), 7)
 SRCDIRS += rocks-boot-7 rocks-boot-pxe
 endif
 
+# ROCKS8
+ifeq ($(strip $(ROCKS.OS.VERSION.MAJOR)), 8)
+SRCDIRS += rocks-boot-8 rocks-boot-pxe
+endif
 
 default:	pkg
 
