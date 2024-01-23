@@ -1,6 +1,7 @@
 %define livearches %{ix86} x86_64 ppc ppc64 ppc64le
 %define _build_id_links none
 %global debug_package %{nil}
+%define _libdir /opt/rocks/lib
 
 Summary: Graphical system installer
 Name:    foundation-anaconda
@@ -208,7 +209,8 @@ export PKG_CONFIG_PATH=/opt/rocks/lib/pkgconfig:%{PKG_CONFIG_PATH}
 export LDFLAGS="-L/opt/rocks/lib"
 export LIBS="-lpython2.7 -ldl -lm -lpthread -lutil /opt/rocks/lib/libssl.a /opt/rocks/lib/libcrypto.a /opt/rocks/lib/libssl.a"
 %configure --disable-static \
-           --enable-introspection
+           --enable-introspection \
+           --libdir=%{_libdir}
 %{__make} %{?_smp_mflags}
 # Force exit for debug
 # exit(1)

@@ -1,8 +1,5 @@
-#!/bin/sh
 #
-# This file should remain OS independent
-#
-# $Id: bootstrap.sh,v 1.6 2012/11/27 00:49:04 phil Exp $
+# $Id: Makefile,v 1.3 2012/11/27 00:48:08 phil Exp $
 #
 # @Copyright@
 # 
@@ -58,59 +55,46 @@
 # 
 # @Copyright@
 #
-# $Log: bootstrap.sh,v $
-# Revision 1.6  2012/11/27 00:49:04  phil
+# $Log: Makefile,v $
+# Revision 1.3  2012/11/27 00:48:08  phil
 # Copyright Storm for Emerald Boa
 #
-# Revision 1.5  2012/05/06 05:49:13  phil
+# Revision 1.2  2012/05/06 05:48:18  phil
 # Copyright Storm for Mamba
 #
-# Revision 1.4  2012/03/02 07:11:29  phil
-# reflect name change to foundation-sqlite
+# Revision 1.1  2012/01/23 19:53:44  phil
+# Required to properly complete buildinstall script provided with Redhat anaconda used in
+# RHEL/CentOS 6
 #
-# Revision 1.3  2012/02/28 05:03:57  phil
-# Add build of sqlite
-#
-# Revision 1.2  2011/07/23 02:31:14  phil
-# Viper Copyright
-#
-# Revision 1.1  2011/04/07 17:08:11  phil
-# Tracker needs fcgi installed before it will build
 #
 
-if [ ! -f "$ROLLSROOT/../../bin/get_sources.sh" ]; then
-	echo "To compile this roll on Rocks 6.1.1 or older you need to install a newer rocks-devel rpm.
-Install it with:
-rpm -Uvh https://googledrive.com/host/0B0LD0shfkvCRRGtadUFTQkhoZWs/rocks-devel-6.2-3.x86_64.rpm
-If you need an older version of this roll you can get it from:
-https://github.com/rocksclusters-attic"
-	exit 1
-fi
+REDHAT.ROOT     = $(CURDIR)/../../
+HTTPGET         = $(ROCKSROOT)/bin/httpget.sh
 
-. $ROLLSROOT/etc/bootstrap-functions.sh || exit 1
+-include $(ROCKSROOT)/etc/Rules.mk
+include Rules.mk
 
+BUILDROOT =  $(CURDIR)/$(NAME).buildroot
 
-# prerequisites for foundation-anaconda
-compile_and_install foundation-glib2
-compile_and_install foundation-gdk-pixbuf2
-compile_and_install foundation-atk
-compile_and_install foundation-at-spi2-atk
-compile_and_install foundation-gtk+
-compile_and_install foundation-glade
+rpm::	$(HOME)/.rpmmacros prespec $(NAME).spec
+	rpmbuild -bb $(REDHAT.ROOT)/SPECS/$(NAME).spec
 
+prespec::
+# ROCKS8 Neded for port of old Rocks Installer to Rocky8
+# http://vault.centos.org/7.9.2009/os/Source/SPackages/yum-3.4.3-168.el7.centos.src.rpm
+ifeq ($(shell ! test -f $(SRCPKGNAME)  && echo -n yes),yes)
+	@echo "ROCKS8: Sideloading $(SRCPKGNAME)."
+	$(HTTPGET) -B http://vault.centos.org -F 7.9.2009/os/Source/SPackages -n $(SRCPKGNAME)
+endif
+	(									\
+		mkdir content && cd content;					\
+		rpm2cpio ../$(SRCPKGNAME) | cpio -idmv && cd ..;		\
+		mv -v content/* ../../SOURCES;					\
+		rm -rf content;							\
+	)
+#	spec file is created separately from foundation-firstboot.spec.in
 
-compile fastcgi
-install foundation-fcgi
-compile sqlite 
-install foundation-sqlite
-
-OSVERSION=$(lsb_release -rs | cut -d . -f 1)
-if [ $OSVERSION == "7" ]; then
-	BUILDPKGS="gtk3-devel-docs glib2-doc gobject-introspection-devel glade-devel \
-	libgnomekbd-devel libxklavier-devel python-nose libtimezonemap-devel libepoxy-devel lorax itstool" 
-	yum -y install $BUILDPKGS
-	compile_and_install opt-atk
-	compile_and_install opt-glib2
-	compile_and_install opt-devel-module
-	compile_and_install opt-gtk+
-fi
+clean::
+	$(RM) -r $(NAME).buildroot
+	$(RM) -r ../../BUILD/$(NAME)*
+	$(RM) $(SRCPKGNAME)

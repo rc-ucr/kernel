@@ -31,6 +31,14 @@
 # This toplevel file is a little messy at the moment... (2001-06-22)
 # ...still messy (2013-07-12)
 
+
+# ROCKS8 - hacky extension for ldconfig to find all the shared objects
+import os
+with open("/etc/ld.so.conf.d/foo.conf", "w") as file:
+    file.write("/opt/rocks/lib")
+os.system("/usr/sbin/ldconfig")
+# Only needed during kickstart from ramdisk
+
 coverage = None
 
 proc_cmdline = open("/proc/cmdline", "r").read()
