@@ -1,0 +1,9 @@
+SRCPKGHOST 	= https://github.com
+SRCPKGPATH 	= kupferlauncher/keybinder/releases/download/keybinder-3.0-v0.3.2
+NAME		= foundation-keybinder
+PKGROOT		= /opt/rocks
+VERSION		= 0.3.2
+RELEASE		= 0
+SUBDIR		= keybinder-3.0-$(VERSION)
+TARFILE		= $(SUBDIR).tar.gz
+RPM.FILES	= "$(PKGROOT)/include/*\\n$(PKGROOT)/lib/*\\n$(PKGROOT)/share/*"
