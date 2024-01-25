@@ -67,18 +67,16 @@ include Rules.mk
 
 build:
 # ROCKS8 - required for foundation-anaconda
-# https://launchpad.net/timezonemap/trunk/0.4.4/+download/libtimezonemap-0.4.4.tar.xz
+# https://download-fallback.gnome.org/sources/libgnomekbd/3.26/libgnomekbd-3.26.1.tar.xz
 ifeq ($(shell ! test -f $(TARFILE) && echo -n yes),yes)
 	@echo "ROCKS8: Sideloading $(TARFILE)."
 	$(HTTPGET) -B $(SRCPKGHOST) -F $(SRCPKGPATH) -n $(TARFILE)
 endif
-	unxz -c $(TARFILE) | $(TAR) xvf -
-	-cd patch-files && find . -type f | grep -v CVS | cpio -pduv ../
+	unxz -c $(TARFILE) | $(TAR) xvf - 
 	(								\
 		cd $(SUBDIR) ; 						\
 		PKG_CONFIG_PATH=/opt/rocks/lib/pkgconfig:$$PKG_CONFIG_PATH	\
-		./configure --prefix=$(PKGROOT);			\
-		PKG_CONFIG_PATH=/opt/rocks/lib/pkgconfig:$$PKG_CONFIG_PATH	\
+		./configure --prefix=$(PKGROOT) --enable-introspection=yes;	\
 		$(MAKE); 						\
 	)
 
@@ -87,11 +85,11 @@ install::
 	(								\
 		cd $(SUBDIR);						\
 		$(MAKE) prefix=$(ROOT)/$(PKGROOT) install;		\
-		rm -f $(ROOT)/$(PKGROOT)/lib/libtimezonemap.so;		\
-		rm -rf $(ROOT)/$(PKGROOT)/lib/pkgconfig;		\
 		rm -rf $(ROOT)/$(PKGROOT)/include;			\
+		rm -rf $(ROOT)/$(PKGROOT)/lib/*.so;			\
+		rm -rf $(ROOT)/$(PKGROOT)/lib/pkgconfig;		\
 		rm -rf $(ROOT)/$(PKGROOT)/share/gir-1.0;		\
-		rm -rf $(ROOT)/$(PKGROOT)/share/glade;			\
+		rm -f $(ROOT)/$(PKGROOT)/share/glib-2.0/schemas/gschemas.compiled;	\
 	)
 
 clean::

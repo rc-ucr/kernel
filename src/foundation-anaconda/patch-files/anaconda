@@ -34,8 +34,8 @@
 
 # ROCKS8 - hacky extension for ldconfig to find all the shared objects
 import os
-with open("/etc/ld.so.conf.d/foo.conf", "w") as file:
-    file.write("/opt/rocks/lib")
+with open("/etc/ld.so.conf.d/foundation.conf", "w") as file:
+    file.write("/opt/rocks/lib\n")
 os.system("/usr/sbin/ldconfig")
 # Only needed during kickstart from ramdisk
 

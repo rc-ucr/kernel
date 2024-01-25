@@ -1,0 +1,9 @@
+SRCPKGHOST 	= https://download-fallback.gnome.org
+SRCPKGPATH 	= sources/libgnomekbd/3.26
+NAME		= foundation-libgnomekbd
+PKGROOT		= /opt/rocks
+VERSION		= 3.26.1
+RELEASE		= 0
+SUBDIR		= libgnomekbd-$(VERSION)
+TARFILE		= $(SUBDIR).tar.xz
+RPM.FILES	= "$(PKGROOT)/bin/*\\n$(PKGROOT)/lib/*\\n$(PKGROOT)/share/*"

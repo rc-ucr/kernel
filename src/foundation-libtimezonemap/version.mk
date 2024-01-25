@@ -6,4 +6,4 @@ VERSION		= 0.4.4
 RELEASE		= 0
 SUBDIR		= libtimezonemap-$(VERSION)
 TARFILE		= $(SUBDIR).tar.xz
-RPM.FILES	= "$(PKGROOT)/include/*\\n$(PKGROOT)/lib/*\\n$(PKGROOT)/share/*"
+RPM.FILES	= "$(PKGROOT)/lib/*\\n$(PKGROOT)/share/*"

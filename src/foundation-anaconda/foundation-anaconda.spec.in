@@ -169,7 +169,7 @@ popd
 # ROCKS8 patches for compabibility with foundation-python-blivet
 cp -f %{buildroot}/../patch-files/anaconda .
 pushd pyanaconda
-cp -f %{buildroot}/../patch-files/pyanaconda/nm.py .
+# cp -f %{buildroot}/../patch-files/pyanaconda/nm.py .
 cp -f %{buildroot}/../patch-files/pyanaconda/rescue.py .
 cp -f %{buildroot}/../patch-files/pyanaconda/install.py .
 # cp -f %{buildroot}/../patch-files/pyanaconda/network.py .

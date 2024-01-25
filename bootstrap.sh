@@ -97,7 +97,8 @@ compile_and_install foundation-atk
 compile_and_install foundation-at-spi2-atk
 compile_and_install foundation-gtk+
 compile_and_install foundation-glade
-
+compile_and_install foundation-libxklavier
+compile_and_install foundation-librsvg
 
 compile fastcgi
 install foundation-fcgi
