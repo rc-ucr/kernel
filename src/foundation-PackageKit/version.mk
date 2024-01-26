@@ -1,0 +1,9 @@
+SRCPKGHOST 	= https://www.freedesktop.org
+SRCPKGPATH 	= software/PackageKit/releases
+NAME		= foundation-PackageKit
+PKGROOT		= /opt/rocks
+VERSION		= 1.1.10
+RELEASE		= 0
+SUBDIR		= PackageKit-$(VERSION)
+TARFILE		= $(SUBDIR).tar.xz
+RPM.FILES	= "$(PKGROOT)/lib/*"
