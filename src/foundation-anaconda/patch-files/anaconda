@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/opt/rocks/bin/python
 #
 # anaconda: The Red Hat Linux Installation program
 #
@@ -1317,7 +1317,7 @@ if __name__ == "__main__":
             log.info("Adding disk %s labeled OEMDRV to ignored disks",
                     oemdrv_disk)
 
-    from blivet.osinstall import storageInitialize
+    from blivet import storageInitialize
     from pyanaconda.packaging import payloadMgr
     from pyanaconda.timezone import time_initialize
 

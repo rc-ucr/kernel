@@ -168,40 +168,41 @@ popd
 
 # ROCKS8 patches for compabibility with foundation-python-blivet
 cp -f %{buildroot}/../patch-files/anaconda .
-pushd pyanaconda
-# cp -f %{buildroot}/../patch-files/pyanaconda/nm.py .
-cp -f %{buildroot}/../patch-files/pyanaconda/rescue.py .
-cp -f %{buildroot}/../patch-files/pyanaconda/install.py .
-# cp -f %{buildroot}/../patch-files/pyanaconda/network.py .
-cp -f %{buildroot}/../patch-files/pyanaconda/geoloc.py .
-cp -f %{buildroot}/../patch-files/pyanaconda/sitecustomize.py .
-cp -f %{buildroot}/../patch-files/pyanaconda/installclass.py .
-cp -f %{buildroot}/../patch-files/pyanaconda/kickstart.py .
-popd
-pushd pyanaconda/installclasses
-cp -f %{buildroot}/../patch-files/pyanaconda/installclasses/centos.py .
-cp -f %{buildroot}/../patch-files/pyanaconda/installclasses/rhel.py .
-cp -f %{buildroot}/../patch-files/pyanaconda/installclasses/rhv.py .
-popd
-pushd pyanaconda/ui/gui/spokes
-cp -f %{buildroot}/../patch-files/pyanaconda/ui/gui/spokes/custom.py .
-# cp -f %{buildroot}/../patch-files/pyanaconda/ui/gui/spokes/network.py .
-cp -f %{buildroot}/../patch-files/pyanaconda/ui/gui/spokes/storage.py .
-popd
-pushd pyanaconda/ui/gui/spokes/lib
-cp -f %{buildroot}/../patch-files/pyanaconda/ui/gui/spokes/lib/dasdfmt.py .
-cp -f %{buildroot}/../patch-files/pyanaconda/ui/gui/spokes/lib/refresh.py .
-popd
-pushd pyanaconda/ui/tui/spokes
-cp -f %{buildroot}/../patch-files/pyanaconda/ui/tui/spokes/storage.py .
-popd
-pushd pyanaconda/ui/tui/simpleline
-cp -f %{buildroot}/../patch-files/pyanaconda/ui/tui/simpleline/base.py .
-cp -f %{buildroot}/../patch-files/pyanaconda/ui/tui/simpleline/widgets.py .
-popd
-pushd scripts
-cp -f %{buildroot}/../patch-files/scripts/anaconda-cleanup .
-popd
+# All following patches deactivated due to roll-back to python-blivet-0.61.15.76 
+#pushd pyanaconda
+## cp -f %{buildroot}/../patch-files/pyanaconda/nm.py .
+#cp -f %{buildroot}/../patch-files/pyanaconda/rescue.py .
+#cp -f %{buildroot}/../patch-files/pyanaconda/install.py .
+## cp -f %{buildroot}/../patch-files/pyanaconda/network.py .
+#cp -f %{buildroot}/../patch-files/pyanaconda/geoloc.py .
+#cp -f %{buildroot}/../patch-files/pyanaconda/sitecustomize.py .
+#cp -f %{buildroot}/../patch-files/pyanaconda/installclass.py .
+#cp -f %{buildroot}/../patch-files/pyanaconda/kickstart.py .
+#popd
+#pushd pyanaconda/installclasses
+#cp -f %{buildroot}/../patch-files/pyanaconda/installclasses/centos.py .
+#cp -f %{buildroot}/../patch-files/pyanaconda/installclasses/rhel.py .
+#cp -f %{buildroot}/../patch-files/pyanaconda/installclasses/rhv.py .
+#popd
+#pushd pyanaconda/ui/gui/spokes
+#cp -f %{buildroot}/../patch-files/pyanaconda/ui/gui/spokes/custom.py .
+## cp -f %{buildroot}/../patch-files/pyanaconda/ui/gui/spokes/network.py .
+#cp -f %{buildroot}/../patch-files/pyanaconda/ui/gui/spokes/storage.py .
+#popd
+#pushd pyanaconda/ui/gui/spokes/lib
+#cp -f %{buildroot}/../patch-files/pyanaconda/ui/gui/spokes/lib/dasdfmt.py .
+#cp -f %{buildroot}/../patch-files/pyanaconda/ui/gui/spokes/lib/refresh.py .
+#popd
+#pushd pyanaconda/ui/tui/spokes
+#cp -f %{buildroot}/../patch-files/pyanaconda/ui/tui/spokes/storage.py .
+#popd
+#pushd pyanaconda/ui/tui/simpleline
+#cp -f %{buildroot}/../patch-files/pyanaconda/ui/tui/simpleline/base.py .
+#cp -f %{buildroot}/../patch-files/pyanaconda/ui/tui/simpleline/widgets.py .
+#popd
+#pushd scripts
+#cp -f %{buildroot}/../patch-files/scripts/anaconda-cleanup .
+#popd
 
 %build
 export PYTHON=/opt/rocks/bin/python
