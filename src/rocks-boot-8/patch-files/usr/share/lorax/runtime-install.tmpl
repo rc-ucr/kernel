@@ -2,65 +2,70 @@
 <%page args="basearch, product"/>
 
 ## anaconda package
-installpkg anaconda anaconda-widgets
+installpkg foundation-anaconda-dracut foundation-anaconda-widgets foundation-anaconda-tui
+installpkg foundation-anaconda-gui foundation-anaconda-core foundation-anaconda
 
-## anaconda deps that aren't in the RPM
-installpkg tmux
-installpkg firstboot
-installpkg iscsi-initiator-utils
 
 ## Other available payloads
-installpkg rpm-ostree
+installpkg dnf
+installpkg rpm-ostree ostree
+## speed up compression on multicore systems
+installpkg pigz
 
 ## kernel and firmware
-installpkg kernel
-## installpkg kernel-core kernel-modules kernel-modules-extra
+## NOTE: Without explicitly including kernel-modules-extra dnf will choose kernel-debuginfo-*
+##       to satify a gfs2-utils kmod requirement
+installpkg kernel kernel-modules kernel-modules-extra
+installpkg grubby
 %if basearch != "s390x":
-    installpkg *-firmware
+    ## skip the firmware for sound, video, and scanners, none of which will
+    ## do much good for the installer. Also skip uhd-firmware which is not
+    ## even a kernel firmware package.
+    installpkg --optional *-firmware --except alsa* --except midisport-firmware \
+                           --except crystalhd-firmware --except ivtv-firmware \
+                           --except cx18-firmware --except iscan-firmware \
+                           --except uhd-firmware --except lulzbot-marlin-firmware
 %endif
+
+## install all of the glibc langpacks since otherwise we get no locales
+installpkg glibc-all-langpacks
 
 ## arch-specific packages (bootloaders etc.)
 %if basearch == "aarch64":
     installpkg efibootmgr grub2-efi-aa64-cdboot grubby shim-aa64
-    installpkg grub2-tools grub2-tools-minimal grub2-tools-extra
-%endif
-%if basearch in ("arm", "armhfp"):
-    installpkg kernel-lpae kernel-tegra
-    installpkg uboot-tools
-%endif
-%if basearch == "i386":
-    installpkg kernel-PAE gpart
 %endif
 %if basearch == "x86_64":
     installpkg grub2-tools-efi
+    installpkg efibootmgr
     installpkg shim-x64 grub2-efi-x64-cdboot
+    installpkg shim-ia32 grub2-efi-ia32-cdboot
 %endif
 %if basearch in ("i386", "x86_64"):
     installpkg biosdevname memtest86+ syslinux
     installpkg grub2-tools grub2-tools-minimal grub2-tools-extra
-    installpkg efibootmgr
-    installpkg shim-ia32 grub2-efi-ia32-cdboot
 %endif
 %if basearch in ("ppc", "ppc64", "ppc64le"):
-    installpkg fbset hfsutils kernel-bootwrapper ppc64-utils
+    installpkg powerpc-utils lsvpd ppc64-diag
     installpkg grub2-tools grub2-tools-minimal grub2-tools-extra
-    installpkg grub2-${basearch}
+    # We only have ppc64le in RHEL8 26-Jul-2018
+    installpkg grub2-ppc64le
 %endif
-
 %if basearch == "s390x":
-    installpkg lsscsi s390utils-base s390utils-cmsfs-fuse s390utils-hmcdrvfs
+    installpkg lsscsi s390utils-base s390utils-cmsfs-fuse
+    installpkg s390utils-hmcdrvfs
 %endif
 
 ## yay, plymouth
 installpkg plymouth
 
 ## extra dracut modules
-installpkg anaconda-dracut dracut-network dracut-config-generic dracut-fips
+installpkg anaconda-dracut dracut-network dracut-config-generic
 
-## redhat-upgrade-dracut handles upgrades on RHEL
-installpkg redhat-upgrade-dracut redhat-upgrade-dracut-plymouth
-log "Looking for extra redhat-upgrade-dracut packages..."
--installpkg *-redhat-upgrade-dracut
+## import-state.service for switchroot
+installpkg initscripts
+
+## rescue needs this
+installpkg cryptsetup
 
 ## rpcbind or portmap needed by dracut nfs module
 installpkg rpcbind
@@ -68,61 +73,60 @@ installpkg rpcbind
 ## required for dracut
 installpkg kbd kbd-misc
 ## required for anaconda-dracut (img-lib etc.)
-installpkg tar xz curl
+installpkg tar xz curl bzip2
 
 ## basic system stuff
-installpkg systemd-sysv systemd-units
+installpkg systemd
 installpkg rsyslog
 
 ## xorg/GUI packages
-%if basearch != "s390x":
 installpkg xorg-x11-drivers xorg-x11-server-Xorg
-%endif
 installpkg xorg-x11-server-utils xorg-x11-xauth
 installpkg dbus-x11 metacity gsettings-desktop-schemas
 installpkg nm-connection-editor
-installpkg at-spi at-spi2-atk pyatspi
-installpkg gnome-python2-gconf
-installpkg gobject-introspection
 installpkg librsvg2
-installpkg polkit-desktop-policy
-installpkg gnome-keyring
-installpkg python-imaging
 
 ## filesystem tools
-installpkg btrfs-progs xfsprogs gfs2-utils
-installpkg python-volume_key volume_key
+installpkg xfsprogs gfs2-utils
 installpkg system-storage-manager
 installpkg device-mapper-persistent-data
 installpkg xfsdump
 
+## extra storage packages
+# hostname is needed for iscsi to work, see RHBZ#1599183
+installpkg udisks2 udisks2-iscsi hostname
+
+## extra libblockdev plugins
+installpkg libblockdev-lvm-dbus
+
+## needed for LUKS escrow
+installpkg volume_key
+installpkg nss-tools
+
 ## SELinux support
-installpkg selinux-policy-targeted audit libsemanage-python
+installpkg selinux-policy-targeted audit
 
 ## network tools/servers
-installpkg python-ethtool ethtool openssh-server nfs-utils
+installpkg ethtool openssh-server nfs-utils openssh-clients
 installpkg tigervnc-server-minimal
-%if basearch != "s390x":
 installpkg tigervnc-server-module
-%endif
 installpkg net-tools
-installpkg bridge-utils
 installpkg nmap-ncat
-
-## ntp packages
-installpkg ntp
+installpkg prefixdevname
+installpkg ipcalc
 
 ## hardware utilities/libraries
 installpkg pciutils usbutils ipmitool
 installpkg mt-st smartmontools
-%if basearch != "s390x":
 installpkg hdparm
+%if basearch not in ("arm", "armhfp"):
+    installpkg libmlx4 rdma-core
 %endif
-installpkg libmlx4 rdma
 installpkg rng-tools
-
-## translations & language packs
-installpkg yum-langpacks
+%if basearch in ("i386", "x86_64", "aarch64"):
+installpkg dmidecode
+%endif
+installpkg nvme-cli
 
 ## fonts & themes
 installpkg bitmap-fangsongti-fonts
@@ -130,71 +134,141 @@ installpkg dejavu-sans-fonts dejavu-sans-mono-fonts
 installpkg kacst-farsi-fonts
 installpkg kacst-qurn-fonts
 installpkg lklug-fonts
-installpkg lohit-*-fonts
+installpkg lohit-assamese-fonts
+installpkg lohit-bengali-fonts
+installpkg lohit-devanagari-fonts
+installpkg lohit-gujarati-fonts
+installpkg lohit-gurmukhi-fonts
+installpkg lohit-kannada-fonts
+installpkg lohit-odia-fonts
+installpkg lohit-tamil-fonts
+installpkg lohit-telugu-fonts
 installpkg madan-fonts
-installpkg nhn-nanum-gothic-fonts
 installpkg smc-meera-fonts
 installpkg thai-scalable-waree-fonts
-installpkg vlgothic-fonts
-installpkg wqy-microhei-fonts
 installpkg sil-abyssinica-fonts
 installpkg xorg-x11-fonts-misc
-installpkg gnome-themes-standard gnome-icon-theme-legacy
-
-## branding & logos
-installpkg gnome-themes-standard
+installpkg aajohan-comfortaa-fonts
+installpkg abattis-cantarell-fonts
+installpkg sil-scheherazade-fonts
+installpkg jomolhari-fonts
+installpkg khmeros-base-fonts
+installpkg sil-padauk-fonts
+installpkg google-noto-sans-cjk-ttc-fonts
 
 ## debugging/bug reporting tools
 installpkg gdb-gdbserver
 installpkg libreport-plugin-bugzilla libreport-plugin-reportuploader
+#installpkg libreport-rhel-anaconda-bugzilla
+installpkg python3-pyatspi
 
 ## extra tools not required by anaconda
-installpkg vim-minimal strace lsof dump xz less eject
-installpkg wget rsync rsh bind-utils ftp mtr
+installpkg vim-minimal strace lsof dump xz less 
+installpkg rsync bind-utils ftp mtr wget 
 installpkg spice-vdagent
 installpkg gdisk hexedit sg3_utils
+installpkg perl-interpreter
 
-## yum plugins
-installpkg yum-langpacks
-
-## RHEL packages
-installpkg subscription-manager
-
-## addons
-installpkg kexec-tools-anaconda-addon
-installpkg oscap-anaconda-addon
-
-## ROCKS PACKAGES
-#
+## ROCKS8
 installpkg rocks-sql
-installpkg foundation-python
-installpkg foundation-python-xml
-installpkg foundation-python-extras
-installpkg foundation-sqlite
 installpkg lighttpd
 installpkg anaconda-rocks
-installpkg foundation-pysqlite
-installpkg foundation-fcgi
 installpkg rocks-tracker
 installpkg rocks-gen
+
+# core
+installpkg foundation-coreutils
+installpkg foundation-curl
+installpkg foundation-device-mapper
+installpkg foundation-dmraid
+installpkg foundation-git
+installpkg foundation-graphviz
+installpkg foundation-libxml2
+installpkg foundation-mysql
+installpkg foundation-NetworkManager
+installpkg foundation-newt
+installpkg foundation-openssl-old
+installpkg foundation-pango
+installpkg foundation-python
+installpkg foundation-python-blivet
+installpkg foundation-python-blockdev
+installpkg foundation-python-bytesize
+installpkg foundation-python-certifi
+installpkg foundation-python-chardet
+installpkg foundation-python-cryptsetup
+installpkg foundation-python-cython
+installpkg foundation-python-dbus
+installpkg foundation-python-enum34
+installpkg foundation-python-extras
+installpkg foundation-python-gobject-introspection
+installpkg foundation-python-idna
+installpkg foundation-python-langtable
+installpkg foundation-python-libuser
+installpkg foundation-python-mako
+installpkg foundation-python-meh
+installpkg foundation-python-ntplib
+installpkg foundation-python-ptyprocess
+installpkg foundation-python-pwquality
+installpkg foundation-python-pyblock
+installpkg foundation-python-pycairo
+installpkg foundation-python-pycurl
+installpkg foundation-python-pygobject
+installpkg foundation-python-pykickstart
+installpkg foundation-python-pyparted
+installpkg foundation-python-pytz
+installpkg foundation-python-pyudev
+installpkg foundation-python-requests
+installpkg foundation-python-rpm
+installpkg foundation-python-selinux
+installpkg foundation-python-setuptools
+installpkg foundation-python-six
+installpkg foundation-python-sos
+installpkg foundation-python-sphinx
+installpkg foundation-python-subprocess32
+installpkg foundation-python-systemd
+installpkg foundation-python-typing
+installpkg foundation-python-urlgrabber
+installpkg foundation-python-urllib3
+installpkg foundation-python-xml
 installpkg foundation-PyYAML
+installpkg foundation-rcs
+installpkg foundation-redhat
+installpkg foundation-wget
+installpkg foundation-yum-metadata-parser
 
+# base
+installpkg foundation-tidy
+
+# kernel
+installpkg foundation-anaconda
+installpkg foundation-atk
+installpkg foundation-at-spi2-atk
+installpkg foundation-firstboot
+installpkg foundation-gdk-pixbuf2
+installpkg foundation-glade
+installpkg foundation-glib2
+installpkg foundation-gtk+
+installpkg foundation-json-glib
+installpkg foundation-keybinder
+installpkg foundation-libcanberra
+installpkg foundation-libgnomekbd
+installpkg foundation-librsvg
+installpkg foundation-libtimezonemap
+installpkg foundation-libxklavier
+installpkg foundation-PackageKit
+installpkg foundation-pysqlite
+installpkg foundation-python-report
+installpkg foundation-python-yum
+  
 ## Rocks dracut modules for modifying initrd
-installpkg anaconda-rocks-dracut 
-
+installpkg anaconda-rocks-dracut
+  
 # fixups? Somehow missing
-installpkg pykickstart
-installpkg anaconda-core
-installpkg sqlite-devel
-installpkg python-libs
-installpkg pygobject2
-installpkg python-blivet
 installpkg adwaita-gtk2-theme
 installpkg yelp
 installpkg openldap
 installpkg filesystem
 installpkg perl
-installpkg libxml2 
 ## END ROCKS
 
 ## actually install all the requested packages

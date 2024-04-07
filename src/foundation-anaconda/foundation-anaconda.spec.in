@@ -168,8 +168,9 @@ popd
 
 # ROCKS8 patches for compabibility with foundation-python-blivet
 cp -f %{buildroot}/../patch-files/anaconda .
-# All following patches deactivated due to roll-back to python-blivet-0.61.15.76 
-#pushd pyanaconda
+# Mostly all following patches deactivated due to roll-back to python-blivet-0.61.15.76 
+pushd pyanaconda
+cp -f %{buildroot}/../patch-files/pyanaconda/constants.py .
 ## cp -f %{buildroot}/../patch-files/pyanaconda/nm.py .
 #cp -f %{buildroot}/../patch-files/pyanaconda/rescue.py .
 #cp -f %{buildroot}/../patch-files/pyanaconda/install.py .
@@ -178,7 +179,7 @@ cp -f %{buildroot}/../patch-files/anaconda .
 #cp -f %{buildroot}/../patch-files/pyanaconda/sitecustomize.py .
 #cp -f %{buildroot}/../patch-files/pyanaconda/installclass.py .
 #cp -f %{buildroot}/../patch-files/pyanaconda/kickstart.py .
-#popd
+popd
 #pushd pyanaconda/installclasses
 #cp -f %{buildroot}/../patch-files/pyanaconda/installclasses/centos.py .
 #cp -f %{buildroot}/../patch-files/pyanaconda/installclasses/rhel.py .

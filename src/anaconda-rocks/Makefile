@@ -87,8 +87,9 @@ $(IMGDIR): clean
 	- mkdir $(IMGDIR)
 	mkdir -p $(IMGDIR)/$(ANACONDA_SHARE) 
 	(cd $(UPDATES); $(TAR) cf - $(ADDON)) | (cd $(IMGDIR)/$(ANACONDA_SHARE); $(TAR) xvf -)
-	mkdir -p $(IMGDIR)/$(SYS.PYPATH)
-	(cd $(ROCKS.PYPATH); $(TAR) cf - _xmlplus) | (cd $(IMGDIR)/$(SYS.PYPATH); $(TAR) xvf -)
+# 	ROCKS8 - no need to copy xml anymore
+#	mkdir -p $(IMGDIR)/$(SYS.PYPATH)
+#	(cd $(ROCKS.PYPATH); $(TAR) cf - _xmlplus) | (cd $(IMGDIR)/$(SYS.PYPATH); $(TAR) xvf -)
 
 	(cd $(UPDATES); $(TAR) cf - $(UPDATES_DIRS)) | (cd $(IMGDIR); $(TAR) xvf -) 	
 	-mkdir -p $(IMGDIR)/$(PRODUCT_DIR)
