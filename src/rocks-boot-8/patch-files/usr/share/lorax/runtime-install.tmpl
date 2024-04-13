@@ -239,26 +239,30 @@ installpkg foundation-yum-metadata-parser
 # base
 installpkg foundation-tidy
 
+# dependencies
+installpkg perl-libs perl-version
+
+
 # kernel
-installpkg foundation-anaconda
-installpkg foundation-atk
-installpkg foundation-at-spi2-atk
-installpkg foundation-firstboot
-installpkg foundation-gdk-pixbuf2
-installpkg foundation-glade
-installpkg foundation-glib2
-installpkg foundation-gtk+
-installpkg foundation-json-glib
-installpkg foundation-keybinder
-installpkg foundation-libcanberra
-installpkg foundation-libgnomekbd
-installpkg foundation-librsvg
-installpkg foundation-libtimezonemap
-installpkg foundation-libxklavier
-installpkg foundation-PackageKit
-installpkg foundation-pysqlite
-installpkg foundation-python-report
-installpkg foundation-python-yum
+#installpkg foundation-anaconda
+#installpkg foundation-atk
+#installpkg foundation-at-spi2-atk
+#installpkg foundation-firstboot
+#installpkg foundation-gdk-pixbuf2
+#installpkg foundation-glade
+#installpkg foundation-glib2
+#installpkg foundation-gtk+
+#installpkg foundation-json-glib
+#installpkg foundation-keybinder
+#installpkg foundation-libcanberra
+#installpkg foundation-libgnomekbd
+#installpkg foundation-librsvg
+#installpkg foundation-libtimezonemap
+#installpkg foundation-libxklavier
+#installpkg foundation-PackageKit
+#installpkg foundation-pysqlite
+#installpkg foundation-python-report
+#installpkg foundation-python-yum
   
 ## Rocks dracut modules for modifying initrd
 installpkg anaconda-rocks-dracut
@@ -268,7 +272,7 @@ installpkg adwaita-gtk2-theme
 installpkg yelp
 installpkg openldap
 installpkg filesystem
-installpkg perl
+# installpkg perl
 ## END ROCKS
 
 ## actually install all the requested packages
