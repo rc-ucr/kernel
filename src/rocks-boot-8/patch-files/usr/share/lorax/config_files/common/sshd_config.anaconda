@@ -1,0 +1,9 @@
+PermitRootLogin yes
+X11Forwarding yes
+X11DisplayOffset 10
+PrintMotd yes
+SyslogFacility AUTHPRIV
+PasswordAuthentication yes
+PermitEmptyPasswords yes
+PermitUserEnvironment yes
+Subsystem sftp internal-sftp

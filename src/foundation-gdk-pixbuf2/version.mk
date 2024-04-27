@@ -1,4 +1,4 @@
-NAME		= foundation-gdk-pixbuf
+NAME		= foundation-gdk-pixbuf2
 PKGROOT		= /opt/rocks
 VERSION		= 2.36.12
 RELEASE		= 0

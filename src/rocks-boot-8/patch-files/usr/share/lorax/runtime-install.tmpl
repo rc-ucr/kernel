@@ -58,8 +58,8 @@ installpkg glibc-all-langpacks
 ## yay, plymouth
 installpkg plymouth
 
-## extra dracut modules
-installpkg anaconda-dracut dracut-network dracut-config-generic
+## extra dracut modules (but not anaconda-dracut)
+installpkg dracut-network dracut-config-generic dracut-live
 
 ## import-state.service for switchroot
 installpkg initscripts
@@ -167,7 +167,6 @@ installpkg vim-minimal strace lsof dump xz less
 installpkg rsync bind-utils ftp mtr wget 
 installpkg spice-vdagent
 installpkg gdisk hexedit sg3_utils
-installpkg perl-interpreter
 
 ## ROCKS8
 installpkg rocks-sql
@@ -239,30 +238,31 @@ installpkg foundation-yum-metadata-parser
 # base
 installpkg foundation-tidy
 
-# dependencies
-installpkg perl-libs perl-version
-
+# dependencies (use explicit versioning here to prevent rpm modularity problems)
+installpkg perl-libs-5.26.3-422.el8
+installpkg perl-version-0.99.24-1.el8
+installpkg perl-interpreter-5.26.3-422.el8
 
 # kernel
-#installpkg foundation-anaconda
-#installpkg foundation-atk
-#installpkg foundation-at-spi2-atk
-#installpkg foundation-firstboot
-#installpkg foundation-gdk-pixbuf2
-#installpkg foundation-glade
-#installpkg foundation-glib2
-#installpkg foundation-gtk+
-#installpkg foundation-json-glib
-#installpkg foundation-keybinder
-#installpkg foundation-libcanberra
-#installpkg foundation-libgnomekbd
-#installpkg foundation-librsvg
-#installpkg foundation-libtimezonemap
-#installpkg foundation-libxklavier
-#installpkg foundation-PackageKit
-#installpkg foundation-pysqlite
-#installpkg foundation-python-report
-#installpkg foundation-python-yum
+installpkg foundation-anaconda
+installpkg foundation-atk
+installpkg foundation-at-spi2-atk
+installpkg foundation-firstboot
+installpkg foundation-gdk-pixbuf2
+installpkg foundation-glade
+installpkg foundation-glib2
+installpkg foundation-gtk+
+installpkg foundation-json-glib
+installpkg foundation-keybinder
+installpkg foundation-libcanberra
+installpkg foundation-libgnomekbd
+installpkg foundation-librsvg
+installpkg foundation-libtimezonemap
+installpkg foundation-libxklavier
+installpkg foundation-PackageKit
+installpkg foundation-pysqlite
+installpkg foundation-python-report
+installpkg foundation-python-yum
   
 ## Rocks dracut modules for modifying initrd
 installpkg anaconda-rocks-dracut
@@ -272,7 +272,7 @@ installpkg adwaita-gtk2-theme
 installpkg yelp
 installpkg openldap
 installpkg filesystem
-# installpkg perl
+installpkg gtk3 json-glib at-spi2-atk libcanberra-gtk3
 ## END ROCKS
 
 ## actually install all the requested packages
